@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: recipe-vault
+
+  jpa:
+    open-in-view: false
+    properties:
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+server:
+  port: 8080
+  error:
+    include-message: always
+    include-binding-errors: always
