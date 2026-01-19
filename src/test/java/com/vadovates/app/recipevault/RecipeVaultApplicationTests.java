@@ -1,10 +1,8 @@
 package com.vadovates.app.recipevault;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
-class RecipeVaultApplicationTests {
+class RecipeVaultApplicationTests extends BaseIntegrationTest {
 
     @Test
     void contextLoads() {
