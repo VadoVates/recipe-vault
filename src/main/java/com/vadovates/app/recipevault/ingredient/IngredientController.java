@@ -20,15 +20,15 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/ingredients")
 public class IngredientController {
-    private final IngredientService service;
+    private final IngredientService ingredientService;
 
-    public IngredientController(IngredientService service) {
-        this.service = service;
+    public IngredientController(IngredientService ingredientService) {
+        this.ingredientService = ingredientService;
     }
 
     @GetMapping
     public List<IngredientDto> getAll() {
-        return service.findAll()
+        return ingredientService.findAll()
                 .stream()
                 .map(IngredientDto::from)
                 .toList();
@@ -36,12 +36,12 @@ public class IngredientController {
 
     @GetMapping("/{id}")
     public IngredientDto getById(@PathVariable Long id) {
-        return IngredientDto.from(service.findById(id));
+        return IngredientDto.from(ingredientService.findById(id));
     }
 
     @GetMapping("/search")
-    public List<IngredientDto> search(@RequestParam String query) {
-        return service.search(query)
+    public List<IngredientDto> search(@RequestParam String q) {
+        return ingredientService.search(q)
                 .stream()
                 .map(IngredientDto::from)
                 .toList();
@@ -49,19 +49,19 @@ public class IngredientController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public IngredientDto create(@Valid @RequestBody CreateIngredientRequest request) {
-        return IngredientDto.from(service.create(request));
+    public IngredientDto create(@Valid @RequestBody CreateIngredientRequest ingredientRequest) {
+        return IngredientDto.from(ingredientService.create(ingredientRequest));
     }
 
     @PutMapping("/{id}")
-    public IngredientDto update (@PathVariable Long id, @Valid @RequestBody CreateIngredientRequest request) {
-        return IngredientDto.from(service.update(id, request));
+    public IngredientDto update (@PathVariable Long id, @Valid @RequestBody CreateIngredientRequest ingredientRequest) {
+        return IngredientDto.from(ingredientService.update(id, ingredientRequest));
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable Long id) {
-        service.delete(id);
+        ingredientService.delete(id);
     }
 
     @ExceptionHandler(IngredientNotFoundException.class)
