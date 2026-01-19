@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-// Na czas testów robię otwarty dostęp przez API, potem będzie poprawiane.
+// TODO: Na czas testów robię otwarty dostęp przez API, potem będzie poprawiane.
 
 @RestController
 @RequestMapping("/api/users")
