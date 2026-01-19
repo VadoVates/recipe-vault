@@ -2,10 +2,8 @@ package com.vadovates.app.recipevault.common;
 
 import com.vadovates.app.recipevault.ingredient.IngredientAlreadyExistsException;
 import com.vadovates.app.recipevault.ingredient.IngredientNotFoundException;
-import com.vadovates.app.recipevault.common.ErrorResponse;
 import com.vadovates.app.recipevault.recipe.RecipeAlreadyExistsException;
 import com.vadovates.app.recipevault.recipe.RecipeNotFoundException;
-import com.vadovates.app.recipevault.recipeingredient.RecipeIngredient;
 import com.vadovates.app.recipevault.recipeingredient.RecipeIngredientAlreadyExistsException;
 import com.vadovates.app.recipevault.recipeingredient.RecipeIngredientNotFoundException;
 import com.vadovates.app.recipevault.user.UserAlreadyExistsException;
@@ -65,11 +63,11 @@ public class GlobalExceptionHandler {
     private ResponseEntity<ErrorResponse> buildResponse(HttpStatus status, String message,
                                                         Map<String, String> errors) {
         ErrorResponse response = new ErrorResponse(
-            Instant.now(),
-            status.value(),
-            status.getReasonPhrase(),
-            message,
-            errors
+                Instant.now(),
+                status.value(),
+                status.getReasonPhrase(),
+                message,
+                errors
         );
 
         return ResponseEntity.status(status).body(response);
