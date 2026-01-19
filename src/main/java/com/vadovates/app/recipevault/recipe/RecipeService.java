@@ -3,7 +3,6 @@ package com.vadovates.app.recipevault.recipe;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
 import java.util.List;
 
 @Service
@@ -54,6 +53,7 @@ public class RecipeService {
     @Transactional
     public Recipe update (Long id, CreateRecipeRequest recipeRequest) {
         Recipe recipe = findById(id);
+        recipe.setUserId(recipeRequest.userId());
         recipe.setTitle(recipeRequest.title());
         recipe.setDescription(recipeRequest.description());
         recipe.setInstructions(recipeRequest.instructions());

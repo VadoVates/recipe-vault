@@ -1,7 +1,5 @@
 package com.vadovates.app.recipevault.recipe;
 
-import jakarta.persistence.Column;
-
 import java.time.Instant;
 
 public record RecipeDto(
