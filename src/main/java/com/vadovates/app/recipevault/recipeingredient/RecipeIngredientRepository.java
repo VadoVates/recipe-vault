@@ -1,6 +1,5 @@
 package com.vadovates.app.recipevault.recipeingredient;
 
-import com.vadovates.app.recipevault.ingredient.IngredientRepository;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

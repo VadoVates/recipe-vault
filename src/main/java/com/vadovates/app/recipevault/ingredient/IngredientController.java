@@ -64,13 +64,4 @@ public class IngredientController {
         ingredientService.delete(id);
     }
 
-    @ExceptionHandler(IngredientNotFoundException.class)
-    public ResponseEntity<String> handleNotFound(IngredientNotFoundException ex) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
-    }
-
-    @ExceptionHandler(IngredientAlreadyExistsException.class)
-    public ResponseEntity<String> handleAlreadyExists(IngredientAlreadyExistsException ex) {
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
-    }
 }

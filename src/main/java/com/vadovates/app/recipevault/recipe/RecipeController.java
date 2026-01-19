@@ -64,13 +64,4 @@ public class RecipeController {
         recipeService.delete(id);
     }
 
-    @ExceptionHandler(RecipeNotFoundException.class)
-    public ResponseEntity<String> handleNotFound (RecipeNotFoundException ex) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
-    }
-
-    @ExceptionHandler(RecipeAlreadyExistsException.class)
-    public ResponseEntity<String> handleAlreadyExists (RecipeAlreadyExistsException ex) {
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
-    }
 }
