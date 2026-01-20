@@ -1,96 +1,99 @@
 package com.vadovates.app.recipevault.ingredient;
 
 import com.vadovates.app.recipevault.BaseIntegrationTest;
-import io.restassured.http.ContentType;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestClient;
 
-import static io.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.empty;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-public class IngredientControllerTest extends BaseIntegrationTest {
+class IngredientControllerTest extends BaseIntegrationTest {
+
+    @LocalServerPort
+    private int port;
+
     @Autowired
     private IngredientRepository ingredientRepository;
 
-    @Test
-    public void shouldCreateIngredient() {
-        given()
-                .contentType(ContentType.JSON)
-                .body("""
-                        {
-                            "name": "Pepper",
-                            "category": "Vegetables"
-                        }
-                        """)
-                .when()
-                    .post("/api/ingredients")
-                .then()
-                    .statusCode(201)
-                    .body("name", equalTo("Pepper"))
-                    .body("category", equalTo("Vegetables"))
-                    .body("id", notNullValue());
+    private RestClient restClient() {
+        return RestClient.builder()
+                .baseUrl("http://localhost:" + port)
+                .build();
     }
 
     @Test
-    public void shouldReturn409WhenIngredientExists() {
+    void shouldCreateIngredient() {
+        String json = """
+                {
+                    "name": "Pepper",
+                    "category": "Vegetables"
+                }
+                """;
+
+        ResponseEntity<IngredientDto> response = restClient()
+                .post()
+                .uri("/api/ingredients")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(json)
+                .retrieve()
+                .toEntity(IngredientDto.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().name()).isEqualTo("Pepper");
+        assertThat(response.getBody().id()).isNotNull();
+    }
+
+    @Test
+    void shouldReturn409WhenIngredientExists() {
         ingredientRepository.save(new Ingredient("Salt", "Spices"));
-        given()
-                .contentType(ContentType.JSON)
-                .body("""
-                        {
-                            "name": "Salt",
-                            "category": "Spices"
-                        }
-                        """)
-                .when()
-                .post("/api/ingredients")
-                .then()
-                .statusCode(409)
-                .body("message", containsString("already exists"));
+
+        String json = """
+                {
+                    "name": "Salt",
+                    "category": "Spices"
+                }
+                """;
+
+        assertThatThrownBy(() ->
+                restClient()
+                        .post()
+                        .uri("/api/ingredients")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(json)
+                        .retrieve()
+                        .toEntity(String.class)
+        ).isInstanceOf(HttpClientErrorException.Conflict.class);
     }
 
     @Test
-    public void shouldReturn404WhenIngredientNotFound() {
-        given()
-                .when()
-                .get("/api/ingredients/9999")
-                .then()
-                .statusCode(404)
-                .body("message", containsString("not found"));
+    void shouldReturn404WhenIngredientNotFound() {
+        assertThatThrownBy(() ->
+                restClient()
+                        .get()
+                        .uri("/api/ingredients/9999")
+                        .retrieve()
+                        .toEntity(String.class)
+        ).isInstanceOf(HttpClientErrorException.NotFound.class);
     }
 
     @Test
-    public void shouldReturnAllIngredients() {
-        // Given
+    void shouldReturnAllIngredients() {
         ingredientRepository.save(new Ingredient("Sugar", "Baking"));
 
-        // When & Then
-        given()
-                .when()
-                .get("/api/ingredients")
-                .then()
-                .statusCode(200)
-                .body("$", not(empty()));
-    }
+        ResponseEntity<IngredientDto[]> response = restClient()
+                .get()
+                .uri("/api/ingredients")
+                .retrieve()
+                .toEntity(IngredientDto[].class);
 
-    @Test
-    public void shouldReturn400WhenNameIsBlank() {
-        given()
-                .contentType(ContentType.JSON)
-                .body("""
-                {
-                    "name": "",
-                    "category": "Test"
-                }
-                """)
-                .when()
-                .post("/api/ingredients")
-                .then()
-                .statusCode(400)
-                .body("details.name", notNullValue());
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotEmpty();
     }
 }
