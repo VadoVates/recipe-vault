@@ -32,6 +32,27 @@ public class RecipeController {
                 .toList();
     }
 
+    @GetMapping("/user/{userId}")
+    public List<RecipeDto> getAllRecipesForUser(@PathVariable Long userId) {
+        return recipeService.findByUserId(userId)
+                .stream()
+                .map(RecipeDto::from)
+                .toList();
+    }
+
+    @GetMapping("/user/{userId}/{recipeId}")
+    public RecipeDto getRecipeForUser(@PathVariable Long userId, @PathVariable Long recipeId) {
+        return RecipeDto.from(recipeService.findByUserIdAndRecipeId(userId, recipeId));
+    }
+
+    @GetMapping("/user/{userId}/search")
+    public List<RecipeDto> searchRecipesForUser(@PathVariable Long userId, @RequestParam String q) {
+        return recipeService.searchByUserId(userId, q)
+                .stream()
+                .map(RecipeDto::from)
+                .toList();
+    }
+
     @GetMapping("/{id}")
     public RecipeDto getById(@PathVariable Long id) {
         return RecipeDto.from(recipeService.findById(id));
@@ -44,6 +65,9 @@ public class RecipeController {
                 .map(RecipeDto::from)
                 .toList();
     }
+
+//    @GetMapping("/{userId}/{id}")
+//    public List<RecipeDto> getRecipesForUser(@RequestParam Long userId) {}
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)

@@ -23,12 +23,21 @@ public class RecipeService {
                 .orElseThrow(() -> new RecipeNotFoundException(id));
     }
 
+    public List<Recipe> findByUserId (Long userId) {
+        return recipeRepository.findByUserId(userId);
+    }
+
+    public Recipe findByUserIdAndRecipeId(Long userId, Long recipeId) {
+        return recipeRepository.findByUserIdAndId(userId, recipeId)
+                .orElseThrow(() -> new RecipeNotFoundException(recipeId));
+    }
+
     public List<Recipe> search(String q) {
         return recipeRepository.findByTitleContainingIgnoreCase(q);
     }
 
-    public List<Recipe> findByUserId (Long userId) {
-        return recipeRepository.findByUserId(userId);
+    public List<Recipe> searchByUserId (Long userId, String q) {
+        return recipeRepository.findByUserIdAndTitleContainingIgnoreCase(userId, q);
     }
 
     @Transactional

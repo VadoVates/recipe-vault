@@ -50,6 +50,8 @@ public class UserControllerTest extends BaseIntegrationTest {
         assertThat(response.getBody().id()).isNotNull();
         assertThat(response.getBody().email()).isEqualTo("test@example.com");
         assertThat(response.getBody().displayName()).isEqualTo("Test User");
+        assertThat(response.getBody().createdAt()).isNotNull();
+        assertThat(response.getBody().updatedAt()).isNotNull();
     }
 
     @Test
@@ -90,6 +92,7 @@ public class UserControllerTest extends BaseIntegrationTest {
     @Test
     void shouldReturnAllUsers() {
         userRepository.save(new User("user1@test.com", "hash", "User One"));
+        userRepository.save(new User("user2@test.com", "hash", "User Two"));
 
         ResponseEntity<UserDto[]> response = restClient()
                 .get()
@@ -99,5 +102,22 @@ public class UserControllerTest extends BaseIntegrationTest {
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotEmpty();
+        assertThat(response.getBody()).hasSize(2);
+    }
+
+    @Test
+    void shouldReturnUserById() {
+        User user1 = userRepository.save(new User("user1@test.com", "hash", "User One"));
+        userRepository.save(new User("user2@test.com", "hash", "User Two"));
+
+        ResponseEntity<User> response = restClient()
+                .get()
+                .uri("/api/users/%d".formatted(user1.getId()))
+                .retrieve()
+                .toEntity(User.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getId()).isEqualTo(user1.getId());
     }
 }

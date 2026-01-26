@@ -8,6 +8,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 
 @Entity
 @Table(name = "users")
@@ -37,8 +38,8 @@ public class User {
         this.email = email;
         this.passwordHash = passwordHash;
         this.displayName = displayName;
-        this.createdAt = Instant.now();
-        this.updatedAt = Instant.now();
+        this.createdAt = Instant.now().truncatedTo(ChronoUnit.MICROS);
+        this.updatedAt = Instant.now().truncatedTo(ChronoUnit.MICROS);
     }
 
     public Long getId() {
@@ -74,6 +75,6 @@ public class User {
     }
 
     public void setUpdatedAt() {
-        this.updatedAt = Instant.now();
+        this.updatedAt = Instant.now().truncatedTo(ChronoUnit.MICROS);
     }
 }

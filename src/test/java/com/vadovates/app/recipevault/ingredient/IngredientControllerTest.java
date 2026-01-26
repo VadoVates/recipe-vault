@@ -49,6 +49,7 @@ class IngredientControllerTest extends BaseIntegrationTest {
         assertThat(response.getBody().id()).isNotNull();
         assertThat(response.getBody().name()).isEqualTo("Pepper");
         assertThat(response.getBody().category()).isEqualTo("Vegetables");
+        assertThat(response.getBody().createdAt()).isNotNull();
     }
 
     @Test
@@ -58,7 +59,7 @@ class IngredientControllerTest extends BaseIntegrationTest {
         String json = """
                 {
                     "name": "Salt",
-                    "category": "Spices"
+                    "category": "Vegetables"
                 }
                 """;
 
@@ -86,7 +87,9 @@ class IngredientControllerTest extends BaseIntegrationTest {
 
     @Test
     void shouldReturnAllIngredients() {
-        ingredientRepository.save(new Ingredient("Sugar", "Baking"));
+        Ingredient ingredient1 = ingredientRepository.save(new Ingredient("Sugar", "Baking"));
+        Ingredient ingredient2 = ingredientRepository.save(new Ingredient("Salt", "Spices"));
+        Ingredient ingredient3 = ingredientRepository.save(new Ingredient("Pepper", "Vegetables"));
 
         ResponseEntity<IngredientDto[]> response = restClient()
                 .get()
@@ -96,5 +99,88 @@ class IngredientControllerTest extends BaseIntegrationTest {
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotEmpty();
+        assertThat(response.getBody()).hasSize(3);
+        assertThat(response.getBody()).contains(IngredientDto.from(ingredient1), IngredientDto.from(ingredient2),
+                IngredientDto.from(ingredient3));
+    }
+
+    @Test
+    void shouldReturnIngredientById() {
+        Ingredient ingredient1 = ingredientRepository.save(new Ingredient("Salt", "Spices"));
+        Ingredient ingredient2 = ingredientRepository.save(new Ingredient("Pepper", "Vegetables"));
+
+        ResponseEntity<IngredientDto> response = restClient()
+                .get()
+                .uri("/api/ingredients/%d".formatted(ingredient1.getId()))
+                .retrieve()
+                .toEntity(IngredientDto.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().id()).isEqualTo(ingredient1.getId());
+        assertThat(response.getBody().name()).isEqualTo("Salt");
+        assertThat(response.getBody().category()).isEqualTo("Spices");
+        assertThat(response.getBody()).isNotEqualTo(IngredientDto.from(ingredient2));
+    }
+
+    @Test
+    void shouldReturnIngredientsByCategory() {
+        Ingredient ingredient1 = ingredientRepository.save(new Ingredient("Salt", "Spices"));
+        Ingredient ingredient2 = ingredientRepository.save(new Ingredient("Pepper", "Spices"));
+        Ingredient ingredient3 = ingredientRepository.save(new Ingredient("Sugar", "Baking"));
+
+        ResponseEntity<IngredientDto[]> response = restClient()
+                .get()
+                .uri("/api/ingredients?category=Spices")
+                .retrieve()
+                .toEntity(IngredientDto[].class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).hasSize(2);
+        assertThat(response.getBody()).contains(IngredientDto.from(ingredient1), IngredientDto.from(ingredient2));
+        assertThat(response.getBody()).doesNotContain(IngredientDto.from(ingredient3));
+    }
+
+    @Test
+    void shouldDeleteIngredient() {
+        Ingredient ingredient1 = ingredientRepository.save(new Ingredient("Salt", "Spices"));
+        Ingredient ingredient2 = ingredientRepository.save(new Ingredient("Pepper", "Vegetables"));
+
+        ResponseEntity<Void> response = restClient()
+                .delete()
+                .uri("/api/ingredients/%d".formatted(ingredient1.getId()))
+                .retrieve()
+                .toBodilessEntity();
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+        assertThat(ingredientRepository.findById(ingredient1.getId())).isEmpty();
+        assertThat(ingredientRepository.findById(ingredient2.getId())).isPresent();
+    }
+
+    @Test
+    void shouldUpdateIngredient() {
+        Ingredient ingredient = ingredientRepository.save(new Ingredient("Salt", "Spices"));
+
+        String json = """
+                {
+                    "name": "Pepper",
+                    "category": "Vegetables"
+                }
+                """;
+
+        ResponseEntity<IngredientDto> response = restClient()
+                .put()
+                .uri("/api/ingredients/%d".formatted(ingredient.getId()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(json)
+                .retrieve()
+                .toEntity(IngredientDto.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().id()).isEqualTo(ingredient.getId());
+        assertThat(response.getBody().name()).isEqualTo("Pepper");
+        assertThat(response.getBody().category()).isEqualTo("Vegetables");
+        assertThat(response.getBody().createdAt()).isEqualTo(ingredient.getCreatedAt());
     }
 }

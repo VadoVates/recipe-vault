@@ -25,9 +25,12 @@ public class IngredientController {
     }
 
     @GetMapping
-    public List<IngredientDto> getAll() {
-        return ingredientService.findAll()
-                .stream()
+    public List<IngredientDto> getAll(@RequestParam(required = false) String category) {
+        List<Ingredient> ingredients = (category != null)
+                ? ingredientService.findByCategory(category)
+                : ingredientService.findAll();
+
+        return ingredients.stream()
                 .map(IngredientDto::from)
                 .toList();
     }

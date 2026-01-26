@@ -8,6 +8,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 
 @Entity
 @Table(name = "recipes")
@@ -58,8 +59,8 @@ public class Recipe {
         this.prepTimeMinutes = prepTimeMinutes;
         this.cookTimeMinutes = cookTimeMinutes;
         this.imageUrl = imageUrl;
-        this.createdAt = Instant.now();
-        this.updatedAt = Instant.now();
+        this.createdAt = Instant.now().truncatedTo(ChronoUnit.MICROS);
+        this.updatedAt = Instant.now().truncatedTo(ChronoUnit.MICROS);
     }
 
     public Long getId() {
@@ -137,6 +138,6 @@ public class Recipe {
     }
 
     public void setUpdatedAt() {
-        this.updatedAt = Instant.now();
+        this.updatedAt = Instant.now().truncatedTo(ChronoUnit.MICROS);
     }
 }
