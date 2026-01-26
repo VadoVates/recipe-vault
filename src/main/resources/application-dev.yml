@@ -18,3 +18,4 @@ logging:
     com.vadovates.app: DEBUG
     org.springframework.web: DEBUG
     org.hibernate.SQL: DEBUG
+    org.flywaydb: DEBUG
