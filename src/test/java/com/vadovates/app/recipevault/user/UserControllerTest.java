@@ -47,9 +47,9 @@ public class UserControllerTest extends BaseIntegrationTest {
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().id()).isNotNull();
         assertThat(response.getBody().email()).isEqualTo("test@example.com");
         assertThat(response.getBody().displayName()).isEqualTo("Test User");
-        assertThat(response.getBody().id()).isNotNull();
     }
 
     @Test

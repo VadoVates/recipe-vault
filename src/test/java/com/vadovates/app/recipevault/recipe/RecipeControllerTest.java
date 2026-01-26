@@ -2,7 +2,6 @@ package com.vadovates.app.recipevault.recipe;
 
 import com.vadovates.app.recipevault.BaseIntegrationTest;
 import com.vadovates.app.recipevault.user.User;
-import com.vadovates.app.recipevault.user.UserDto;
 import com.vadovates.app.recipevault.user.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,80 +31,95 @@ public class RecipeControllerTest extends BaseIntegrationTest {
                 .baseUrl("http://localhost:" + port)
                 .build();
     }
-/*
+
     @Test
     void shouldCreateRecipe() {
-        User user = userRepository.save(new User (""))
-        String json = """
-                {   
-                    "userId": "test@example.com",
-                    "password": "secret123",
-                    "displayName": "Test User"
-                }
-                """;
-
-        ResponseEntity<UserDto> response = restClient()
-                .post()
-                .uri("/api/users")
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(json)
-                .retrieve()
-                .toEntity(UserDto.class);
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-        assertThat(response.getBody()).isNotNull();
-        assertThat(response.getBody().email()).isEqualTo("test@example.com");
-        assertThat(response.getBody().displayName()).isEqualTo("Test User");
-        assertThat(response.getBody().id()).isNotNull();
-    }
-
-    @Test
-    void shouldReturn409WhenUserExists() {
-        userRepository.save(new User("existing@example.com", "hash", "Existing"));
+        User user = userRepository.save(new User("chef@test.com", "hash", "Chef"));
 
         String json = """
                 {
-                    "email": "existing@example.com",
-                    "password": "password",
-                    "displayName": "Another"
+                    "userId": %d,
+                    "title": "Spaghetti",
+                    "description": "Simple spaghetti recipe",
+                    "instructions": "Boil pasta, add sauce",
+                    "servings": 4,
+                    "prepTimeMinutes": 15,
+                    "cookTimeMinutes": 20,
+                    "imageUrl": "http://localhost/image.jpg"
                 }
-                """;
+                """.formatted(user.getId());
 
-        assertThatThrownBy(() ->
-                restClient()
-                        .post()
-                        .uri("/api/users")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .body(json)
-                        .retrieve()
-                        .toEntity(String.class)
-        ).isInstanceOf(HttpClientErrorException.Conflict.class);
+        ResponseEntity<RecipeDto> response = restClient()
+                .post()
+                .uri("/api/recipes")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(json)
+                .retrieve()
+                .toEntity(RecipeDto.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().id()).isNotNull();
+        assertThat(response.getBody().userId()).isEqualTo(user.getId());
+        assertThat(response.getBody().title()).isEqualTo("Spaghetti");
+        assertThat(response.getBody().description()).isEqualTo("Simple spaghetti recipe");
+        assertThat(response.getBody().instructions()).isEqualTo("Boil pasta, add sauce");
+        assertThat(response.getBody().servings()).isEqualTo(4);
+        assertThat(response.getBody().prepTimeMinutes()).isEqualTo(15);
+        assertThat(response.getBody().cookTimeMinutes()).isEqualTo(20);
+        assertThat(response.getBody().imageUrl()).isEqualTo("http://localhost/image.jpg");
     }
 
-
     @Test
-    void shouldReturn404WhenUserNotFound() {
+    void shouldReturn404WhenRecipeNotFound() {
         assertThatThrownBy(() ->
                 restClient()
                         .get()
-                        .uri("/api/users/9999")
+                        .uri("/api/recipes/9999")
                         .retrieve()
                         .toEntity(String.class)
         ).isInstanceOf(HttpClientErrorException.NotFound.class);
     }
 
     @Test
-    void shouldReturnAllUsers() {
-        userRepository.save(new User("user1@test.com", "hash", "User One"));
+    void shouldReturnAllRecipes() {
+        User user = userRepository.save(new User("user1@test.com", "hash", "User One"));
+        recipeRepository.save(new Recipe(user.getId(), "Pizza", "Easy pizza recipe",
+                "Put tomato sauce on the dough and put it into the oven",
+                2, 60, 30, "https://server.com/img.png"));
 
-        ResponseEntity<UserDto[]> response = restClient()
+        ResponseEntity<RecipeDto[]> response = restClient()
                 .get()
-                .uri("/api/users")
+                .uri("/api/recipes")
                 .retrieve()
-                .toEntity(UserDto[].class);
+                .toEntity(RecipeDto[].class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotEmpty();
     }
-    */
+
+    @Test
+    void shouldReturn409WhenDuplicateRecipeForSameUser() {
+        User user = userRepository.save(new User("existing@example.com", "hash", "Existing"));
+        recipeRepository.save(new Recipe(user.getId(), "Pasta", null, "Boil pasta",
+                4, 5, 30, null));
+        String json = """
+                {
+                    "userId": %d,
+                    "title": "Pasta",
+                    "instructions": "Totally different instructions",
+                    "servings": 2
+                }
+                """.formatted(user.getId());
+
+        assertThatThrownBy(() ->
+                restClient()
+                        .post()
+                        .uri("/api/recipes")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(json)
+                        .retrieve()
+                        .toEntity(String.class)
+        ).isInstanceOf(HttpClientErrorException.Conflict.class);
+    }
 }

@@ -46,8 +46,9 @@ class IngredientControllerTest extends BaseIntegrationTest {
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         assertThat(response.getBody()).isNotNull();
-        assertThat(response.getBody().name()).isEqualTo("Pepper");
         assertThat(response.getBody().id()).isNotNull();
+        assertThat(response.getBody().name()).isEqualTo("Pepper");
+        assertThat(response.getBody().category()).isEqualTo("Vegetables");
     }
 
     @Test

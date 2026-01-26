@@ -46,7 +46,7 @@ public class RecipeService {
                 recipeRequest.prepTimeMinutes(),
                 recipeRequest.cookTimeMinutes(),
                 recipeRequest.imageUrl()
-                );
+        );
         return recipeRepository.save(recipe);
     }
 
