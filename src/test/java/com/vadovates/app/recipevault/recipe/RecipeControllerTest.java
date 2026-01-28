@@ -208,7 +208,7 @@ public class RecipeControllerTest extends BaseIntegrationTest {
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().id()).isEqualTo(recipe1.getId());
     }
-
+// TODO:
 //    @Test
 //    void shouldDeleteRecipe() {
 //        User user1 = userRepository.save(new User("user1@test.com", "hash", "User"));

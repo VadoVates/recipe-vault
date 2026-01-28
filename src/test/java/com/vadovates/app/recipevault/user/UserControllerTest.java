@@ -120,4 +120,8 @@ public class UserControllerTest extends BaseIntegrationTest {
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getId()).isEqualTo(user1.getId());
     }
+
+    // TODO:
+    // @Test
+    // void shouldDeleteUser(){}
 }

@@ -41,8 +41,7 @@ public class IngredientSteps {
 
     @Before
     public void cleanup() {
-        //noinspection SqlResolve
-        jdbcTemplate.execute("TRUNCATE TABLE recipe_ingredients, recipes, ingredients, users RESTART IDENTITY CASCADE");
+        jdbcTemplate.execute("TRUNCATE TABLE ingredients RESTART IDENTITY CASCADE");
     }
 
     @Given("the ingredients database is empty")
